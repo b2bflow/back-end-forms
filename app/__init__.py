@@ -17,7 +17,7 @@ def create_app():
         app,
         resources={r"/*": {
             "origins": [
-                "https://formulario-formulario.lm1d9l.easypanel.host"
+                "https://form.b2bflow.com.br"
             ]
         }},
         supports_credentials=True,
