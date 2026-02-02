@@ -1,0 +1,84 @@
+# ============================================
+# PYTHON
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Docker
+infralocal/
+.yml
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ============================================
+# FLASK
+# ============================================
+instance/
+*.db
+*.sqlite3
+
+# ============================================
+# ENVIRONMENT VARIABLES
+# ============================================
+.env
+*.env
+
+# ============================================
+# LOGS
+# ============================================
+*.log
+logs/
+*.out
+
+# ============================================
+# BYTECODE / CACHE
+# ============================================
+.cache/
+pytest_cache/
+.pytest_cache/
+coverage_html/
+htmlcov/
+.coverage
+.coverage.*
+
+# ============================================
+# EDITOR / OS FILES
+# ============================================
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+<<<<<<< HEAD
+credentials/
+
+=======
+>>>>>>> 68de87f (Initial commit)
