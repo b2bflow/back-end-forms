@@ -14,18 +14,18 @@ def create_app():
     app = Flask(__name__)
 
     CORS(
-        app,
-        resources={r"/*": {
-            "origins": [
-                "https://form.b2bflow.com.br",
-                "https://formulario-frontend.lm1d9l.easypanel.host",
-                "https://formulario-app.lm1d9l.easypanel.host",
-                "https://157.173.119.252"
-            ]
-        }},
-        supports_credentials=True,
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization"]
+    app,
+    resources={r"/*": {
+        "origins": [
+            "https://form.b2bflow.com.br/",
+            "https://formulario-frontend.lm1d9l.easypanel.host/",
+            "https://formulario-app.lm1d9l.easypanel.host/",
+            "https://157.173.119.252/"
+        ]
+    }},
+    supports_credentials=True,
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "x-client-token"]
     )
 
     init_db()
