@@ -13,7 +13,17 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
 
-    CORS(app)
+    CORS(
+        app,
+        resources={r"/*": {
+            "origins": [
+                "https://formulario-formulario.lm1d9l.easypanel.host"
+            ]
+        }},
+        supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"]
+    )
 
     init_db()
     
