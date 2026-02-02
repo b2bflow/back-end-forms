@@ -1,10 +1,14 @@
 import os
+import subprocess
 from app import create_app
 
 app = create_app()
 
+
 if __name__ == '__main__':
-    if os.getenv('FLASK_ENV') == 'production':
-        app.run(debug=False, host='0.0.0.0', port=os.getenv('PORT'))
+    port = os.getenv('PORT', 5000)
+
+    if os.getenv('APP_ENV') == 'production':
+        subprocess.run(["gunicorn", "run:app", "--bind", f"0.0.0.0:{port}"])
     else:
-        app.run(debug=True, host='localhost', port=5000)
+        subprocess.run(["flask", "run", "--host", "localhost", "--port", port, "--debug"])
