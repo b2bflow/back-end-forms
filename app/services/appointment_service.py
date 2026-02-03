@@ -14,7 +14,7 @@ class AppointmentService(AppointmentServiceInterface):
         self.pipedrive_client = PipedriveClient()
 
     def create_appointment(self, data: dict) -> dict:
-        print(f"Recebendo agendamento: {data}")
+        # print(f"Recebendo agendamento: {data}")
 
         lead = self.repository.find_by_token(data.get("leadToken"))
         if not lead:

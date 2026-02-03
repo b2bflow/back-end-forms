@@ -13,7 +13,7 @@ class AuthService(AuthServiceInterface):
         pass
 
     def verify_token(self, data: Dict) -> Dict:
-        print(data)
+        # print(data)
         lead = self.lead_repository.find_by_token(data["token"])
 
         if not lead:
