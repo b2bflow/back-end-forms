@@ -128,10 +128,10 @@ class PipedriveClient:
     def _post(self, endpoint: str, data: dict):
         """Método auxiliar para requisições POST"""
         url = f"{self.base_url}/{endpoint}?api_token={self.api_token}"
-        print(f"Requisição POST para {url}.")
+        # print(f"Requisição POST para {url}.")
         response = requests.post(url, json=data, headers=self._get_headers())
 
-        print(response.json())
+        # print(response.json())
         
         if response.status_code == 201:
             return response.json()['data']
@@ -160,7 +160,7 @@ class PipedriveClient:
             "name": name,
             "owner_id": self.owner_id,
             "visible_to": self.visible_to,
-            # self.FIELD_MOTIVO_IA: motivo_ia
+            self.FIELD_MOTIVO_IA: motivo_ia
         }
         
         print(f"🏢 Criando Organização: {name}...")
