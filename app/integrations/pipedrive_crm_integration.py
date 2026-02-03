@@ -160,7 +160,7 @@ class PipedriveClient:
             "name": name,
             "owner_id": self.owner_id,
             "visible_to": self.visible_to,
-            self.FIELD_MOTIVO_IA: motivo_ia
+            # self.FIELD_MOTIVO_IA: motivo_ia
         }
         
         print(f"🏢 Criando Organização: {name}...")
