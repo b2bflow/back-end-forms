@@ -14,7 +14,7 @@ class LeadService(LeadServiceInterface):
         self.pipedrive_client = PipedriveClient()
 
     def create_lead(self, data: Dict) -> Dict:
-        print(data)
+        # print(data)
 
         lead = self.repository.find_by_email(data["email"])
 

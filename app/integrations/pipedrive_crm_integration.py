@@ -128,7 +128,7 @@ class PipedriveClient:
     def _post(self, endpoint: str, data: dict):
         """Método auxiliar para requisições POST"""
         url = f"{self.base_url}/{endpoint}?api_token={self.api_token}"
-        print(f"Requisição POST para {url}. Dados: {data}")
+        print(f"Requisição POST para {url}.")
         response = requests.post(url, json=data, headers=self._get_headers())
 
         print(response.json())
