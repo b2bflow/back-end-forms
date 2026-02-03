@@ -1,6 +1,10 @@
 import os
 import subprocess
 from app import create_app
+from app.utils.stdout_redirect import redirect_console_to_file
+
+os.makedirs("logs", exist_ok=True)
+redirect_console_to_file()
 
 app = create_app()
 
