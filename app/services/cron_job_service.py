@@ -128,7 +128,7 @@ class CronJobService(CronJobServiceInterface):
                     first_name = lead.name.split()[0] if lead.name else "Cliente"
                     time_str = meeting_time.strftime('%H:%M')
                     
-                    msg = f"Bom dia {first_name}! Tudo certo?\n\nPara facilitar seu acesso nossa reunião {time_str}\nsegue o link da call.\n\nlink:\n\nQualquer coisa só chamar!"
+                    msg = f"Bom dia {first_name}! Tudo certo?\n\nPara facilitar seu acesso nossa reunião {time_str}\nsegue o link da call.\n\nlink:{lead.meet_link}\n\nQualquer coisa só chamar!"
 
                     if self.zapi.send_message(lead.phone, msg):
                         self.lead_repository.update_by_id(lead.id, {"reminder_sent": True})

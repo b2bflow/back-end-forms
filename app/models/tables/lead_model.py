@@ -16,6 +16,7 @@ class Lead(Document):
         "invoicing",
         "collaborators",
         "scheduling_day",
+        "meet_link",
         "confirmation_sent",
         "recovery_sent",
         "reminder_sent"
@@ -34,6 +35,7 @@ class Lead(Document):
     id_person_pipedrive = IntField()
     id_organization_pipedrive = IntField()
     id_deal_pipedrive = IntField()
+    meet_link = StringField()
     
     confirmation_sent = BooleanField(default=False)
     recovery_sent = BooleanField(default=False)
@@ -115,5 +117,6 @@ class Lead(Document):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "confirmation_sent": self.confirmation_sent,
             "recovery_sent": self.recovery_sent,
-            "reminder_sent": self.reminder_sent
+            "reminder_sent": self.reminder_sent,
+            "meet_link": self.meet_link
         }
