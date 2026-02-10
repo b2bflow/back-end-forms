@@ -26,7 +26,7 @@ class LeadRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def update_by_id(self, lead_id: str, data: Dict) -> Lead:
+    def update_by_phone(self, lead_phone: str, data: Dict) -> Lead:
         pass
 
     @abstractmethod

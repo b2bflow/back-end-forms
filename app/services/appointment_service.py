@@ -53,9 +53,9 @@ class AppointmentService(AppointmentServiceInterface):
             if event and 'htmlLink' in event:
                 print(f"Sucesso! Evento disponível em: {event['htmlLink']}")
 
-                self.repository.update_by_id(lead.id, {"scheduling_day": start_time_obj})
+                self.repository.update_by_phone(lead.phone, {"scheduling_day": start_time_obj})
 
-                self.repository.update_by_id(lead.id, {"meet_link": event.get('hangoutLink')})
+                self.repository.update_by_phone(lead.phone, {"meet_link": event.get('hangoutLink')})
 
                 # deal_id = self.pipedrive_client.get_deal_by_title(f"{lead.business_name} | {lead.name}")
 

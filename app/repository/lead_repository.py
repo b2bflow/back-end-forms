@@ -20,8 +20,8 @@ class LeadRepository(LeadRepositoryInterface):
     def list_all(self) -> List[Lead]:
         return list(Lead.objects())
     
-    def update_by_id(self, lead_id: str, data: Dict) -> Lead:
-        return Lead.update_by_id(lead_id, data)
+    def update_by_phone(self, lead_phone: str, data: Dict) -> Lead:
+        return Lead.update_by_phone(lead_phone, data)
     
     def find_pending_confirmations(self) -> List[Lead]:
         return Lead.find_pending_confirmations()
