@@ -19,7 +19,6 @@ class LeadResponseDTO:
             "business_name": lead.business_name,
             "email": lead.email,
             "phone": lead.phone,
-            "job_position": lead.job_position,
             "appointmentDate": appt_date,
             "appointmentTime": appt_time,
         }

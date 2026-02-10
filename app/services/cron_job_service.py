@@ -62,7 +62,7 @@ class CronJobService(CronJobServiceInterface):
                     msg = f"Eaee {first_name}! Tudo certo?\n\nAqui é o Marcelo Baldi da b2bflow.\n\nVi que você agendou uma reunião comigo dia {date_str}. e antes quero te ligar e entender melhor seu cenário para tornar nossa call mais produtiva\n\nQual horário posso te ligar?"
                     
                     if self.zapi.send_message(lead.phone, msg):
-                        self.lead_repository.update_by_id(lead.id, {"confirmation_sent": True})
+                        self.lead_repository.update_by_phone(lead.phone, {"confirmation_sent": True})
                         print(f"[CONFIRMAÇÃO] Enviada para: {lead.name}")
                         count += 1
             
@@ -95,7 +95,7 @@ class CronJobService(CronJobServiceInterface):
                     msg = f"Eaee {first_name}! Tudo certo?\n\nAqui é o Marcelo Baldi da b2bflow.\n\nVi que entrou em contato para atender\ncomo implementar IA na operação, e acredito que posso ajudar\n\nQual horário posso te ligar e entender melhor seu momento?"
                     
                     if self.zapi.send_message(lead.phone, msg):
-                        self.lead_repository.update_by_id(lead.id, {"recovery_sent": True})
+                        self.lead_repository.update_by_phone(lead.phone, {"recovery_sent": True})
                         print(f"[RECUPERAÇÃO] Enviada para: {lead.name}")
                         count += 1
 
@@ -131,7 +131,7 @@ class CronJobService(CronJobServiceInterface):
                     msg = f"Bom dia {first_name}! Tudo certo?\n\nPara facilitar seu acesso nossa reunião {time_str}\nsegue o link da call.\n\nlink:{lead.meet_link}\n\nQualquer coisa só chamar!"
 
                     if self.zapi.send_message(lead.phone, msg):
-                        self.lead_repository.update_by_id(lead.id, {"reminder_sent": True})
+                        self.lead_repository.update_by_phone(lead.phone, {"reminder_sent": True})
                         print(f"[LEMBRETE 1H] Enviado para: {lead.name}")
                         count += 1
             

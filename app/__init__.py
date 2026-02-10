@@ -20,7 +20,7 @@ def create_app():
             "https://form.b2bflow.com.br",
             "https://formulario-frontend.lm1d9l.easypanel.host",
             "https://formulario-app.lm1d9l.easypanel.host",
-            "https://157.173.119.252"
+            "https://157.173.119.252",
         ]
     }},
     supports_credentials=True,
