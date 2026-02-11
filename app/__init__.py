@@ -18,6 +18,7 @@ def create_app():
     resources={r"/*": {
         "origins": [
             "https://form.b2bflow.com.br",
+            "https://form2.b2bflow.com.br",
             "https://formulario-frontend.lm1d9l.easypanel.host",
             "https://formulario-app.lm1d9l.easypanel.host",
             "https://157.173.119.252",
