@@ -20,6 +20,7 @@ class SalesLeadData(EmbeddedDocument):
 class Lead(Document):
     meta = {
         "collection": "leads",
+        "strict": False,
         "indexes": [
             "phone",
             "email",
