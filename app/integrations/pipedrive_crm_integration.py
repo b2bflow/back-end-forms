@@ -172,7 +172,7 @@ class PipedriveClient:
         print(f"🏢 Criando Organização: {name}...")
         return self._post("organizations", data)
     
-    def update_organization_details(self, org_id: int, segmento: str = None, faturamento: int = None, funcionarios: int = None, produto: str = None, desafio: int = None, momento: int = None, capacidade_investimento: int = None):
+    def update_organization_details(self, org_id: int, segmento: str = None, faturamento: int = None, funcionarios: int = None, produto: str = None, desafio: list = None, momento: int = None, capacidade_investimento: int = None):
         data = {}
 
         if segmento: data[self.FIELD_SEGMENTO] = segmento

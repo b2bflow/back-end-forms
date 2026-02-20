@@ -1,10 +1,10 @@
-from mongoengine import Document, EmbeddedDocument, StringField, DateTimeField, IntField, BooleanField, EmbeddedDocumentField
+from mongoengine import Document, EmbeddedDocument, StringField, DateTimeField, IntField, BooleanField, EmbeddedDocumentField, ListField
 from datetime import datetime
 from typing import Dict, List, Optional
 
 class LeadFollowupData(EmbeddedDocument):
     """Dados vindos do formulário de Consultoria/Followup"""
-    challenge = StringField()
+    challenge = ListField(StringField())
     customer_stage = StringField()
     investment_capacity = StringField()
     

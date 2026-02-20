@@ -19,13 +19,13 @@ class LeadService(LeadServiceInterface):
         lead = self.repository.find_by_email(data["email"])
 
         if lead is not None:
-            if lead.email == data["email"] and lead.phone == data["phone"]:
+            if lead.email == data["email"] or lead.phone == data["phone"]:
 
                 lead.confirmation_sent = False
                 lead.recovery_sent = False
                 lead.reminder_sent = False
 
-                lead = self.repository.update_by_phone(str(lead.phone), lead.to_dict())
+                lead = self.repository.update_by_phone(str(lead.phone), data=data)
 
                 return {
                     "message": "Lead já cadastrado",
@@ -127,7 +127,19 @@ class LeadService(LeadServiceInterface):
         
     def update_followup_lead(self, lead: Lead) -> Dict:
 
-        id_desafio = self.pipedrive_client._get_pipedrive_option_id("desafio", lead.followup_data.challenge)
+        desafios_selecionados = lead.followup_data.challenge
+        ids_desafios = []
+        
+        if isinstance(desafios_selecionados, list):
+            for texto_desafio in desafios_selecionados:
+                id_op = self.pipedrive_client._get_pipedrive_option_id("desafio", texto_desafio)
+                if id_op:
+                    ids_desafios.append(str(id_op))
+            
+            valor_desafio_final = ",".join(ids_desafios)
+        else:
+            valor_desafio_final = self.pipedrive_client._get_pipedrive_option_id("desafio", desafios_selecionados)
+
         id_momento = self.pipedrive_client._get_pipedrive_option_id("momento", lead.followup_data.customer_stage)
         id_capacidade_investimento = self.pipedrive_client._get_pipedrive_option_id("investimento", lead.followup_data.investment_capacity)
 
@@ -135,7 +147,7 @@ class LeadService(LeadServiceInterface):
             print('atualizando detalhes')
             self.pipedrive_client.update_organization_details(
                 org_id=lead.id_organization_pipedrive,
-                desafio=id_desafio,
+                desafio=valor_desafio_final,
                 momento=id_momento,
                 capacidade_investimento=id_capacidade_investimento,
             )
