@@ -16,7 +16,10 @@ class LeadService(LeadServiceInterface):
     def create_lead(self, data: Dict) -> Dict:
         print(data)
 
-        lead = self.repository.find_by_email(data["email"])
+        lead = self.repository.find_by_phone(data["phone"])
+
+        if lead is None:
+            lead = self.repository.find_by_email(data["email"])
 
         if lead is not None:
             if lead.email == data["email"] or lead.phone == data["phone"]:
