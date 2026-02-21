@@ -14,7 +14,7 @@ class LeadService(LeadServiceInterface):
         self.pipedrive_client = PipedriveClient()
 
     def create_lead(self, data: Dict) -> Dict:
-        logger.info(f"[LEAD_SERVICE] Creating lead with data: {data}")
+        logger.info(f"[LEAD_SERVICE] Criando lead")
 
         lead = self.repository.find_by_phone(data["phone"])
 
@@ -69,7 +69,7 @@ class LeadService(LeadServiceInterface):
             raise ValueError(str(e))
 
     def update_lead(self, data: Dict) -> Dict:
-        logger.info(f"[LEAD_SERVICE] Atualizando lead com dados: {data}")
+        logger.info(f"[LEAD_SERVICE] Atualizando dados do lead")
         lead = self.repository.find_by_phone(data["phone"])
 
         if not lead:
@@ -112,7 +112,7 @@ class LeadService(LeadServiceInterface):
                     new_stage_id=2,
                 )
             else:
-                logger.warning(f"[LEAD_SERVICE] Aviso: Deal '{deal_title}' não encontrado para atualização.")
+                logger.warning(f"[LEAD_SERVICE] Aviso: Deal '{deal_id}' não encontrado para atualização.")
 
             return {
                 "message": "Lead atualizado com sucesso",
@@ -143,7 +143,7 @@ class LeadService(LeadServiceInterface):
         id_capacidade_investimento = self.pipedrive_client._get_pipedrive_option_id("investimento", lead.followup_data.investment_capacity)
 
         try:
-            logger.info(f"[LEAD_SERVICE] Atualizando detalhes do lead: {lead.name}")
+            logger.info(f"[LEAD_SERVICE] Atualizando campos do lead")
             self.pipedrive_client.update_organization_details(
                 org_id=lead.id_organization_pipedrive,
                 desafio=valor_desafio_final,
@@ -160,7 +160,7 @@ class LeadService(LeadServiceInterface):
                     new_stage_id=2,
                 )
             else:
-                logger.warning(f"[LEAD_SERVICE] Aviso: Deal '{deal_title}' não encontrado para atualização.")
+                logger.warning(f"[LEAD_SERVICE] Aviso: Deal '{deal_id}' não encontrado para atualização.")
 
             return {
                 "message": "Lead atualizado com sucesso",

@@ -157,7 +157,7 @@ def create_event(summary: str, description: str, start_time: datetime, lead_emai
     service = get_calendar_service()
     calendar_id = 'primary'
 
-    logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] Criando evento: {summary} em {start_time}")
+    logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] Criando evento")
 
     end_time = start_time + timedelta(hours=duration_hours)
 
@@ -201,8 +201,8 @@ def create_event(summary: str, description: str, start_time: datetime, lead_emai
         meet_link = event.get('conferenceData', {}).get('entryPoints', [{}])[0].get('uri', 'Link não gerado')
         
         logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] ✅ Evento criado com sucesso!")
-        logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] 🔗 Link do evento: {event.get('htmlLink')}")
-        logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] 📹 Google Meet: {meet_link}")
+        logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] 🔗 Link do evento gerado")
+        logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] 📹 Google Meet da reunião gerado")
         
         return event
     except Exception as e:

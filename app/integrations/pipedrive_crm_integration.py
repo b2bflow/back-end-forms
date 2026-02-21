@@ -57,7 +57,7 @@ class PipedriveClient:
         if deal_id:
             data["deal_id"] = deal_id
 
-        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 📅 Criando atividade '{subject}' para {due_date} às {due_time}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 📅 Criando atividade no Pipedrive")
         return self._post("activities", data)
 
     def schedule_confirmation_call(self, meeting_datetime: datetime, person_id: int, org_id: int, deal_id: int = None):
@@ -171,7 +171,7 @@ class PipedriveClient:
             # self.FIELD_MOTIVO_IA: motivo_ia
         }
         
-        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 🏢 Criando Organização: {name}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 🏢 Criando Organização no Pipedrive")
         return self._post("organizations", data)
     
     def update_organization_details(self, org_id: int, segmento: str = None, faturamento: int = None, funcionarios: int = None, produto: str = None, desafio: list = None, momento: int = None, capacidade_investimento: int = None):
@@ -203,7 +203,7 @@ class PipedriveClient:
             "org_id": org_id
         }
 
-        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 👤 Criando Pessoa: {name}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 👤 Criando Pessoa no Pipedrive")
         return self._post("persons", data)
 
     def create_deal(self, title: str, person_id: int, org_id: int, value: float = 0) -> dict:
@@ -224,7 +224,7 @@ class PipedriveClient:
             # "owner_id": self.owner_id
         }
 
-        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 💰 Criando Negócio: {title}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 💰 Criando Negócio no Pipedrive")
         return self._post("deals", data)
 
     def update_deal_stage(self, deal_id: int, new_stage_id: int):

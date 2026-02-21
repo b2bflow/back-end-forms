@@ -45,7 +45,7 @@ class ZAPIClient:
 
         # Validação básica de tamanho (Ex: 55 + 11 + 999999999 = 12 a 13 digitos)
         if len(clean_phone) < 12:
-            logger.warning(f"[ZAPI_INTEGRATION] Telefone inválido (muito curto): {clean_phone}")
+            logger.warning(f"[ZAPI_INTEGRATION] Telefone inválido (muito curto)")
             return None
             
         return clean_phone
@@ -78,13 +78,12 @@ class ZAPIClient:
         max_attempts = 3
         for attempt in range(1, max_attempts + 1):
             try:
-                logger.info(f"[ZAPI_INTEGRATION] Enviando para {target_phone} (Tentativa {attempt})...")
+                logger.info(f"[ZAPI_INTEGRATION] Enviando para mensagem para contato (Tentativa {attempt})...")
                 
                 response = requests.post(url, json=payload, headers=self.headers, timeout=10)
                 response.raise_for_status() # Levanta erro se status code for 4xx ou 5xx
 
-                logger.info(f"[ZAPI_INTEGRATION] Status: {response.status_code}")
-                logger.info(f"[ZAPI_INTEGRATION] Body: {response.text}")
+                logger.info(f"[ZAPI_INTEGRATION] Status: {response.status_code} Resposta: {response.text}")
 
                 return True
 

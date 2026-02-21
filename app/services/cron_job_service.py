@@ -65,7 +65,7 @@ class CronJobService(CronJobServiceInterface):
                     
                     if self.zapi.send_message(lead.phone, msg):
                         self.lead_repository.update_by_phone(lead.phone, {"confirmation_sent": True})
-                        logger.info(f"[CRON_JOB_SERVICE] Confirmação enviada para: {lead.name}")
+                        logger.info(f"[CRON_JOB_SERVICE] Confirmação enviada para lead")
                         count += 1
             
             except Exception as e:
@@ -97,7 +97,7 @@ class CronJobService(CronJobServiceInterface):
                     
                     if self.zapi.send_message(lead.phone, msg):
                         self.lead_repository.update_by_phone(lead.phone, {"recovery_sent": True})
-                        logger.info(f"[CRON_JOB_SERVICE] Recuperação enviada para: {lead.name}")
+                        logger.info(f"[CRON_JOB_SERVICE] Recuperação enviada para lead")
                         count += 1
 
             except Exception as e:
@@ -132,7 +132,7 @@ class CronJobService(CronJobServiceInterface):
 
                     if self.zapi.send_message(lead.phone, msg):
                         self.lead_repository.update_by_phone(lead.phone, {"reminder_sent": True})
-                        logger.info(f"[CRON_JOB_SERVICE] Lembrete 1H enviado para: {lead.name}")
+                        logger.info(f"[CRON_JOB_SERVICE] Lembrete 1H enviado para lead")
                         count += 1
             
             except Exception as e:

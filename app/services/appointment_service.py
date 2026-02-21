@@ -42,7 +42,7 @@ class AppointmentService(AppointmentServiceInterface):
         )
 
         try:
-            logger.info(f"[APPOINTMENT_SERVICE] Iniciando integração Google Calendar para {start_time_obj}...")
+            logger.info(f"[APPOINTMENT_SERVICE] Criando evento no google calendar")
             event = create_event(
                 summary=summary, 
                 description=description, 
@@ -52,13 +52,13 @@ class AppointmentService(AppointmentServiceInterface):
             )
 
             if event and 'htmlLink' in event:
-                logger.info(f"[APPOINTMENT_SERVICE] Sucesso! Evento disponível em: {event['htmlLink']}")
+                logger.info(f"[APPOINTMENT_SERVICE] Sucesso! Evento criado no Google Calendar.")
 
                 self.repository.update_by_phone(lead.phone, {"scheduling_day": start_time_obj})
 
                 self.repository.update_by_phone(lead.phone, {"meet_link": event.get('hangoutLink')})
 
-                logger.info(f"[APPOINTMENT_SERVICE] Deal ID: {lead.id_deal_pipedrive} - {lead.business_name} | {lead.name}")
+                logger.info(f"[APPOINTMENT_SERVICE] Deal ID: {lead.id_deal_pipedrive}")
 
                 self.pipedrive_client.update_deal_stage(
                     deal_id=lead.id_deal_pipedrive,
