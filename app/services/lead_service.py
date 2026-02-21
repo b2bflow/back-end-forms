@@ -46,16 +46,16 @@ class LeadService(LeadServiceInterface):
         try:
             lead = Lead(**data)
             
-            # data_id = self.pipedrive_client.process_new_lead(
-            #     company_name=data["business_name"],
-            #     lead_name=data["name"],
-            #     email=data["email"],
-            #     phone=data["phone"],
-            # )
+            data_id = self.pipedrive_client.process_new_lead(
+                company_name=data["business_name"],
+                lead_name=data["name"],
+                email=data["email"],
+                phone=data["phone"],
+            )
 
-            # lead.id_person_pipedrive = data_id["person_id"]
-            # lead.id_organization_pipedrive = data_id["org_id"]
-            # lead.id_deal_pipedrive = data_id["deal_id"]
+            lead.id_person_pipedrive = data_id["person_id"]
+            lead.id_organization_pipedrive = data_id["org_id"]
+            lead.id_deal_pipedrive = data_id["deal_id"]
 
             lead = self.repository.create(lead)
 
@@ -80,11 +80,11 @@ class LeadService(LeadServiceInterface):
             data=data
         )
 
-        # if updated_lead.type_lead == 'venda':
-        #     return self.update_sales_lead(updated_lead)
+        if updated_lead.type_lead == 'venda':
+            return self.update_sales_lead(updated_lead)
 
-        # if updated_lead.type_lead == 'consultoria':
-        #     return self.update_followup_lead(updated_lead)
+        if updated_lead.type_lead == 'consultoria':
+            return self.update_followup_lead(updated_lead)
     
     def list_leads(self,) -> List[Dict]:
         leads = self.repository.list_all()
