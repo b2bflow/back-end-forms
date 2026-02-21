@@ -5,11 +5,12 @@ import dateutil.parser
 import dateutil.tz
 from pathlib import Path
 from datetime import datetime, timedelta
-
+from app.utils.logging_config import logger
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -26,10 +27,10 @@ def get_calendar_service():
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            print("Renovando token expirado...")
+            logger.info("[GOOGLE_CALENDAR_INTEGRATION] Renovando token expirado...")
             creds.refresh(Request())
         else:
-            print("Iniciando fluxo de login no navegador...")
+            logger.info("[GOOGLE_CALENDAR_INTEGRATION] Iniciando fluxo de login no navegador...")
             if not os.path.exists(CREDENTIALS_FILE):
                 raise FileNotFoundError(f"Arquivo não encontrado: {CREDENTIALS_FILE}. Baixe o OAuth Client ID do Google Cloud.")
                 
@@ -38,7 +39,7 @@ def get_calendar_service():
 
         with open(TOKEN_FILE, 'w') as token:
             token.write(creds.to_json())
-            print(f"Token salvo em: {TOKEN_FILE}")
+            logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] Token salvo em: {TOKEN_FILE}")
 
     service = build('calendar', 'v3', credentials=creds)
     return service
@@ -74,7 +75,7 @@ def get_free_busy_slots() -> list:
 
         formatted_slots = []
 
-        print(f"\n--- Horários Ocupados Detectados ---")
+        logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] Horários Ocupados Detectados")
         for slot in busy_slots_raw:
             start_utc = dateutil.parser.isoparse(slot['start'])
             end_utc = dateutil.parser.isoparse(slot['end'])
@@ -88,12 +89,12 @@ def get_free_busy_slots() -> list:
                 "hora_fim": end_br.strftime('%H:%M')
             }
             formatted_slots.append(slot_data)
-            print(f"Dia: {slot_data['data']} | {slot_data['hora_inicio']} - {slot_data['hora_fim']}")
+            logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] Quantidade de horários livres: {len(formatted_slots)}")
 
         return formatted_slots
 
     except Exception as e:
-        print(f"Erro ao consultar disponibilidade: {e}")
+        logger.error(f"[GOOGLE_CALENDAR_INTEGRATION] Erro ao consultar disponibilidade: {e}")
         return None
 
 def get_available_slots():
@@ -156,7 +157,7 @@ def create_event(summary: str, description: str, start_time: datetime, lead_emai
     service = get_calendar_service()
     calendar_id = 'primary'
 
-    print(f"\nCriando evento: {summary} em {start_time}")
+    logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] Criando evento: {summary} em {start_time}")
 
     end_time = start_time + timedelta(hours=duration_hours)
 
@@ -199,33 +200,11 @@ def create_event(summary: str, description: str, start_time: datetime, lead_emai
 
         meet_link = event.get('conferenceData', {}).get('entryPoints', [{}])[0].get('uri', 'Link não gerado')
         
-        print(f"✅ Evento criado com sucesso!")
-        print(f"🔗 Link do evento: {event.get('htmlLink')}")
-        print(f"📹 Google Meet: {meet_link}")
+        logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] ✅ Evento criado com sucesso!")
+        logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] 🔗 Link do evento: {event.get('htmlLink')}")
+        logger.info(f"[GOOGLE_CALENDAR_INTEGRATION] 📹 Google Meet: {meet_link}")
         
         return event
     except Exception as e:
-        print(f"❌ Erro ao criar evento: {e}")
+        logger.error(f"[GOOGLE_CALENDAR_INTEGRATION] ❌ Erro ao criar evento: {e}")
         return None
-
-# --- BLOCO DE TESTE ---
-if __name__ == "__main__":
-    # Teste simples ao rodar o arquivo
-    
-    # 1. Verificar slots (isso vai disparar a autenticação na primeira vez)
-    slots = get_available_slots()
-    
-    # 2. Exemplo de criação de reunião
-    tz = dateutil.tz.gettz('America/Sao_Paulo')
-    
-    # Marca para amanhã às 10h
-    amanha = datetime.now(tz) + timedelta(days=1)
-    inicio_reuniao = amanha.replace(hour=10, minute=0, second=0, microsecond=0)
-    
-    create_event(
-        summary="Reunião de Diagnóstico",
-        description="Conversa sobre automação.",
-        start_time=inicio_reuniao,
-        lead_email="carloserico71@gmail.com", # Troque para testar
-        lead_name="Cliente Teste"
-    )

@@ -4,6 +4,8 @@ import dateutil
 from dotenv import load_dotenv
 import requests
 from typing import Optional
+from app.utils.logging_config import logger
+
 
 load_dotenv()
 
@@ -55,7 +57,7 @@ class PipedriveClient:
         if deal_id:
             data["deal_id"] = deal_id
 
-        print(f"📅 Criando atividade '{subject}' para {due_date} às {due_time}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 📅 Criando atividade '{subject}' para {due_date} às {due_time}...")
         return self._post("activities", data)
 
     def schedule_confirmation_call(self, meeting_datetime: datetime, person_id: int, org_id: int, deal_id: int = None):
@@ -128,7 +130,7 @@ class PipedriveClient:
         if response.status_code == 200:
             return response.json()
         else:
-            print(f"Erro ao buscar em {endpoint}: {response.text}")
+            logger.error(f"[PIPEDRIVE_CRM_INTEGRATION] Erro ao buscar em {endpoint}: {response.text}")
             return None
     
     def _post(self, endpoint: str, data: dict):
@@ -142,7 +144,7 @@ class PipedriveClient:
         if response.status_code == 201:
             return response.json()['data']
         else:
-            print(f"Erro ao criar em {endpoint}: {response.text}")
+            logger.error(f"[PIPEDRIVE_CRM_INTEGRATION] Erro ao criar em {endpoint}: {response.text}")
             return None
 
     def _put(self, endpoint: str, resource_id: int, data: dict):
@@ -151,10 +153,10 @@ class PipedriveClient:
         response = requests.put(url, json=data, headers=self._get_headers())
         
         if response.status_code == 200:
-            print(f" Atualização realizada com sucesso no ID {resource_id}")
+            logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] Atualização realizada com sucesso no ID {resource_id}")
             return response.json()['data']
         else:
-            print(f" Erro ao atualizar {endpoint}/{resource_id}: {response.text}")
+            logger.error(f"[PIPEDRIVE_CRM_INTEGRATION] Erro ao atualizar {endpoint}/{resource_id}: {response.text}")
             return None
 
     def create_organization(self, name: str, motivo_ia: str = "") -> dict:
@@ -169,7 +171,7 @@ class PipedriveClient:
             # self.FIELD_MOTIVO_IA: motivo_ia
         }
         
-        print(f"🏢 Criando Organização: {name}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 🏢 Criando Organização: {name}...")
         return self._post("organizations", data)
     
     def update_organization_details(self, org_id: int, segmento: str = None, faturamento: int = None, funcionarios: int = None, produto: str = None, desafio: list = None, momento: int = None, capacidade_investimento: int = None):
@@ -185,7 +187,7 @@ class PipedriveClient:
 
         if not data: return None
 
-        print(f"Atualizando dados da Organização {org_id}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] Atualizando dados da Organização {org_id}...")
         return self._put("organizations", org_id, data)
 
     def create_person(self, name: str, org_id: int, email: str = None, phone: str = None) -> dict:
@@ -201,7 +203,7 @@ class PipedriveClient:
             "org_id": org_id
         }
 
-        print(f"👤 Criando Pessoa: {name}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 👤 Criando Pessoa: {name}...")
         return self._post("persons", data)
 
     def create_deal(self, title: str, person_id: int, org_id: int, value: float = 0) -> dict:
@@ -222,7 +224,7 @@ class PipedriveClient:
             # "owner_id": self.owner_id
         }
 
-        print(f"💰 Criando Negócio: {title}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 💰 Criando Negócio: {title}...")
         return self._post("deals", data)
 
     def update_deal_stage(self, deal_id: int, new_stage_id: int):
@@ -232,7 +234,7 @@ class PipedriveClient:
         data = {
             "stage_id": new_stage_id
         }
-        print(f"🚀 Movendo Deal {deal_id} para etapa {new_stage_id}...")
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 🚀 Movendo Deal {deal_id} para etapa {new_stage_id}...")
         return self._put("deals", deal_id, data)
     
     def _get_pipedrive_option_id(self, category: str, value: str) -> int:
@@ -313,7 +315,7 @@ class PipedriveClient:
             elif category == "investimento":
                 return investimento_map.get(value)
         except Exception as e:
-            print(f"Erro ao mapear valor '{value}' para categoria '{category}': {e}")
+            logger.error(f"[PIPEDRIVE_CRM_INTEGRATION] Erro ao mapear valor '{value}' para categoria '{category}': {e}")
             return None
         
         return None
@@ -347,7 +349,7 @@ class PipedriveClient:
         }
         
         if deal:
-            print(f"Fluxo completo! Deal ID: {deal['id']}")
+            logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] Fluxo completo! Deal ID: {deal['id']}")
             return data_id
         return None
 

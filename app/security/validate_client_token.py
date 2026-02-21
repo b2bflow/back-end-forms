@@ -10,9 +10,6 @@ def validate_client_token(func):
 
         expected_token = os.getenv("CLIENT_TOKEN")
 
-        # print('X-Client-Token',token_client)
-        # print('CLIENT_TOKEN', expected_token)
-
         if not expected_token:
             return jsonify({
                 "mensagem": "Configuração de segurança inválida",

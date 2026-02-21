@@ -1,10 +1,10 @@
-from datetime import datetime
-
 import dateutil
 from app.integrations.pipedrive_crm_integration import PipedriveClient
 from app.interfaces.repositories.lead_repository_interface import LeadRepositoryInterface
 from app.interfaces.services.appointment_service_interface import AppointmentServiceInterface
 from app.integrations.google_calendar_integration import create_event, get_available_slots
+from app.utils.logging_config import logger
+from datetime import datetime
 
 
 class AppointmentService(AppointmentServiceInterface):
@@ -14,10 +14,10 @@ class AppointmentService(AppointmentServiceInterface):
         self.pipedrive_client = PipedriveClient()
 
     def create_appointment(self, data: dict) -> dict:
-        # print(f"Recebendo agendamento: {data}")
-
+        logger.info(f"[APPOINTMENT_SERVICE] Criando agendamento.")
         lead = self.repository.find_by_token(data.get("leadToken"))
         if not lead:
+            logger.error("[APPOINTMENT_SERVICE] Lead nao encontrado")
             return {"error": "Lead não encontrado"}
 
         try:
@@ -28,6 +28,7 @@ class AppointmentService(AppointmentServiceInterface):
             lead.scheduling_day = start_time_obj
 
         except (KeyError, ValueError) as e:
+            logger.error(f"[APPOINTMENT_SERVICE] Erro ao processar data/hora: {e}")
             return {"error": f"Dados de data/hora ausentes ou inválidos: {e}"}
 
         lead_name = lead.get('name') if isinstance(lead, dict) else getattr(lead, 'name', 'Desconhecido')
@@ -41,7 +42,7 @@ class AppointmentService(AppointmentServiceInterface):
         )
 
         try:
-            print(f"Iniciando integração Google Calendar para {start_time_obj}...")
+            logger.info(f"[APPOINTMENT_SERVICE] Iniciando integração Google Calendar para {start_time_obj}...")
             event = create_event(
                 summary=summary, 
                 description=description, 
@@ -51,15 +52,13 @@ class AppointmentService(AppointmentServiceInterface):
             )
 
             if event and 'htmlLink' in event:
-                print(f"Sucesso! Evento disponível em: {event['htmlLink']}")
+                logger.info(f"[APPOINTMENT_SERVICE] Sucesso! Evento disponível em: {event['htmlLink']}")
 
                 self.repository.update_by_phone(lead.phone, {"scheduling_day": start_time_obj})
 
                 self.repository.update_by_phone(lead.phone, {"meet_link": event.get('hangoutLink')})
 
-                # deal_id = self.pipedrive_client.get_deal_by_title(f"{lead.business_name} | {lead.name}")
-
-                print(f"Deal ID: {lead.id_deal_pipedrive} - {lead.business_name} | {lead.name}")
+                logger.info(f"[APPOINTMENT_SERVICE] Deal ID: {lead.id_deal_pipedrive} - {lead.business_name} | {lead.name}")
 
                 self.pipedrive_client.update_deal_stage(
                     deal_id=lead.id_deal_pipedrive,
@@ -89,7 +88,7 @@ class AppointmentService(AppointmentServiceInterface):
             return {"success": False, "error": "Resposta inválida da API do Google"}
                 
         except Exception as e:
-            print(f"Falha crítica na criação do evento: {str(e)}")
+            logger.error(f"[APPOINTMENT_SERVICE] Falha crítica na criação do evento: {str(e)}")
             return {"success": False, "error": "Ocorreu um erro interno ao processar o agendamento."}
 
     def list_busy_slots(self) -> list:
@@ -97,5 +96,5 @@ class AppointmentService(AppointmentServiceInterface):
             busy_slots = get_available_slots()
             return busy_slots if busy_slots is not None else []
         except Exception as e:
-            print(f"Erro ao listar horários ocupados: {e}")
+            logger.error(f"[APPOINTMENT_SERVICE] Erro ao listar horários ocupados: {e}")
             return []

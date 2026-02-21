@@ -3,7 +3,7 @@ from app.interfaces.repositories.lead_repository_interface import LeadRepository
 from app.integrations.pipedrive_crm_integration import PipedriveClient
 from app.models.tables.lead_model import Lead
 from typing import Dict, List
-
+from app.utils.logging_config import logger
 from app.security.session_token import SessionTokenService
 
 
@@ -14,7 +14,7 @@ class LeadService(LeadServiceInterface):
         self.pipedrive_client = PipedriveClient()
 
     def create_lead(self, data: Dict) -> Dict:
-        print(data)
+        logger.info(f"[LEAD_SERVICE] Creating lead with data: {data}")
 
         lead = self.repository.find_by_phone(data["phone"])
 
@@ -46,16 +46,16 @@ class LeadService(LeadServiceInterface):
         try:
             lead = Lead(**data)
             
-            data_id = self.pipedrive_client.process_new_lead(
-                company_name=data["business_name"],
-                lead_name=data["name"],
-                email=data["email"],
-                phone=data["phone"],
-            )
+            # data_id = self.pipedrive_client.process_new_lead(
+            #     company_name=data["business_name"],
+            #     lead_name=data["name"],
+            #     email=data["email"],
+            #     phone=data["phone"],
+            # )
 
-            lead.id_person_pipedrive = data_id["person_id"]
-            lead.id_organization_pipedrive = data_id["org_id"]
-            lead.id_deal_pipedrive = data_id["deal_id"]
+            # lead.id_person_pipedrive = data_id["person_id"]
+            # lead.id_organization_pipedrive = data_id["org_id"]
+            # lead.id_deal_pipedrive = data_id["deal_id"]
 
             lead = self.repository.create(lead)
 
@@ -65,12 +65,11 @@ class LeadService(LeadServiceInterface):
                 "status": "created",
             }
         except Exception as e:
-            print(f"Falha na criação do lead: {str(e)}")
+            logger.error(f"[LEAD_SERVICE] Falha na criação do lead: {str(e)}")
             raise ValueError(str(e))
 
     def update_lead(self, data: Dict) -> Dict:
-        print(f"Dados recebidos: {data}")
-
+        logger.info(f"[LEAD_SERVICE] Atualizando lead com dados: {data}")
         lead = self.repository.find_by_phone(data["phone"])
 
         if not lead:
@@ -81,11 +80,11 @@ class LeadService(LeadServiceInterface):
             data=data
         )
 
-        if updated_lead.type_lead == 'venda':
-            return self.update_sales_lead(updated_lead)
+        # if updated_lead.type_lead == 'venda':
+        #     return self.update_sales_lead(updated_lead)
 
-        if updated_lead.type_lead == 'consultoria':
-            return self.update_followup_lead(updated_lead)
+        # if updated_lead.type_lead == 'consultoria':
+        #     return self.update_followup_lead(updated_lead)
     
     def list_leads(self,) -> List[Dict]:
         leads = self.repository.list_all()
@@ -95,9 +94,6 @@ class LeadService(LeadServiceInterface):
         try:
             id_faturamento = self.pipedrive_client._get_pipedrive_option_id("faturamento", lead.sales_data.invoicing)
             id_funcionarios = self.pipedrive_client._get_pipedrive_option_id("funcionarios", lead.sales_data.collaborators)
-
-            # print(id_faturamento)
-            # print(id_funcionarios)
 
             self.pipedrive_client.update_organization_details(
                 org_id=lead.id_organization_pipedrive,
@@ -116,7 +112,7 @@ class LeadService(LeadServiceInterface):
                     new_stage_id=2,
                 )
             else:
-                print(f"Aviso: Deal '{deal_title}' não encontrado para atualização.")
+                logger.warning(f"[LEAD_SERVICE] Aviso: Deal '{deal_title}' não encontrado para atualização.")
 
             return {
                 "message": "Lead atualizado com sucesso",
@@ -125,7 +121,7 @@ class LeadService(LeadServiceInterface):
             }
 
         except Exception as e:
-            print(f"Falha na integração com Pipedrive update_sales_lead: {str(e)}")
+            logger.error(f"[LEAD_SERVICE] Falha na integração com Pipedrive update_sales_lead: {str(e)}")
             raise ValueError(f"Erro ao processar Pipedrive: {str(e)}")
         
     def update_followup_lead(self, lead: Lead) -> Dict:
@@ -147,7 +143,7 @@ class LeadService(LeadServiceInterface):
         id_capacidade_investimento = self.pipedrive_client._get_pipedrive_option_id("investimento", lead.followup_data.investment_capacity)
 
         try:
-            print('atualizando detalhes')
+            logger.info(f"[LEAD_SERVICE] Atualizando detalhes do lead: {lead.name}")
             self.pipedrive_client.update_organization_details(
                 org_id=lead.id_organization_pipedrive,
                 desafio=valor_desafio_final,
@@ -164,7 +160,7 @@ class LeadService(LeadServiceInterface):
                     new_stage_id=2,
                 )
             else:
-                print(f"Aviso: Deal '{deal_title}' não encontrado para atualização.")
+                logger.warning(f"[LEAD_SERVICE] Aviso: Deal '{deal_title}' não encontrado para atualização.")
 
             return {
                 "message": "Lead atualizado com sucesso",
@@ -173,5 +169,5 @@ class LeadService(LeadServiceInterface):
             }
 
         except Exception as e:
-            print(f"Falha na integração com Pipedrive update_followup_lead: {str(e)}")
+            logger.error(f"[LEAD_SERVICE] Falha na integração com Pipedrive update_followup_lead: {str(e)}")
             raise ValueError(f"Erro ao processar Pipedrive: {str(e)}")

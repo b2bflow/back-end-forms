@@ -3,6 +3,8 @@ import dateutil.tz
 from app.interfaces.repositories.lead_repository_interface import LeadRepositoryInterface
 from app.interfaces.services.cron_job_service_interface import CronJobServiceInterface
 from app.integrations.zapi_integration import ZAPIClient
+from app.utils.logging_config import logger
+
 
 class CronJobService(CronJobServiceInterface):
     def __init__(self, repository: LeadRepositoryInterface):
@@ -38,7 +40,7 @@ class CronJobService(CronJobServiceInterface):
         """
         Envia mensagem de confirmação 1h APÓS o cliente ter realizado o agendamento.
         """
-        print("[CRON] Iniciando verificação de confirmação de agendamento...")
+        logger.info("[CRON_JOB_SERVICE] Iniciando verificação de confirmação de agendamento...")
         
         leads = self.lead_repository.find_pending_confirmations() 
         now = self._get_now()
@@ -63,19 +65,18 @@ class CronJobService(CronJobServiceInterface):
                     
                     if self.zapi.send_message(lead.phone, msg):
                         self.lead_repository.update_by_phone(lead.phone, {"confirmation_sent": True})
-                        print(f"[CONFIRMAÇÃO] Enviada para: {lead.name}")
+                        logger.info(f"[CRON_JOB_SERVICE] Confirmação enviada para: {lead.name}")
                         count += 1
             
             except Exception as e:
-                print(f"Erro confirmação lead {getattr(lead, 'id', 'Unknown')}: {e}")
-
+                logger.error(f"[CRON_JOB_SERVICE] Erro confirmação lead {getattr(lead, 'id', 'Unknown')}: {e}")
         return f"Processamento finalizado. {count} confirmações enviadas."
 
     def send_recovery_message(self):
         """
         Recupera leads que se cadastraram há mais de 1h e NÃO agendaram.
         """
-        print("[CRON] Iniciando verificação de recuperação (abandono)...")
+        logger.info("[CRON_JOB_SERVICE] Iniciando verificação de recuperação (abandono)...")
         
         leads = self.lead_repository.find_abandoned_leads()
         now = self._get_now()
@@ -96,12 +97,11 @@ class CronJobService(CronJobServiceInterface):
                     
                     if self.zapi.send_message(lead.phone, msg):
                         self.lead_repository.update_by_phone(lead.phone, {"recovery_sent": True})
-                        print(f"[RECUPERAÇÃO] Enviada para: {lead.name}")
+                        logger.info(f"[CRON_JOB_SERVICE] Recuperação enviada para: {lead.name}")
                         count += 1
 
             except Exception as e:
-                print(f"Erro recuperação lead {getattr(lead, 'id', 'Unknown')}: {e}")
-
+                logger.error(f"[CRON_JOB_SERVICE] Erro recuperação lead {getattr(lead, 'id', 'Unknown')}: {e}")
         return f"Processamento finalizado. {count} recuperações enviadas."
     
     def send_meeting_reminder(self):
@@ -109,7 +109,7 @@ class CronJobService(CronJobServiceInterface):
         Envia um lembrete se faltar aproximadamente 1 hora para a reunião.
         (Janela de 50 a 70 minutos para garantir captura)
         """
-        print("[CRON] Iniciando verificação de lembrete de reunião...")
+        logger.info("[CRON_JOB_SERVICE] Iniciando verificação de lembrete de reunião...")
         
         leads = self.lead_repository.find_upcoming_meetings()
         now = self._get_now()
@@ -132,10 +132,9 @@ class CronJobService(CronJobServiceInterface):
 
                     if self.zapi.send_message(lead.phone, msg):
                         self.lead_repository.update_by_phone(lead.phone, {"reminder_sent": True})
-                        print(f"[LEMBRETE 1H] Enviado para: {lead.name}")
+                        logger.info(f"[CRON_JOB_SERVICE] Lembrete 1H enviado para: {lead.name}")
                         count += 1
             
             except Exception as e:
-                print(f"Erro lembrete lead {getattr(lead, 'id', 'Unknown')}: {e}")
-
+                logger.error(f"[CRON_JOB_SERVICE] Erro lembrete lead {getattr(lead, 'id', 'Unknown')}: {e}")
         return f"Processamento finalizado. {count} lembretes enviados."

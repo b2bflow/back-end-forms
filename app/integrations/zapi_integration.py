@@ -3,6 +3,8 @@ import re
 import time
 from dotenv import load_dotenv
 import requests
+from app.utils.logging_config import logger
+
 
 load_dotenv()
 
@@ -21,7 +23,7 @@ class ZAPIClient:
 
         # Validação inicial das variáveis de ambiente
         if not all([self.base_url, self.instance_id, self.instance_token, self.client_token]):
-            print("[Z-API] Aviso: Variáveis de ambiente incompletas.")
+            logger.info("[ZAPI_INTEGRATION] Aviso: Variáveis de ambiente incompletas.")
 
     def _get_api_url(self, endpoint: str) -> str:
         """Monta a URL completa baseada no padrão da Z-API."""
@@ -43,7 +45,7 @@ class ZAPIClient:
 
         # Validação básica de tamanho (Ex: 55 + 11 + 999999999 = 12 a 13 digitos)
         if len(clean_phone) < 12:
-            print(f"[Z-API] Telefone inválido (muito curto): {clean_phone}")
+            logger.warning(f"[ZAPI_INTEGRATION] Telefone inválido (muito curto): {clean_phone}")
             return None
             
         return clean_phone
@@ -54,11 +56,11 @@ class ZAPIClient:
         # 1. Validações
         target_phone = self._format_phone(phone)
         if not target_phone:
-            print("[Z-API] Falha: Telefone inválido.")
+            logger.warning("[ZAPI_INTEGRATION] Falha: Telefone inválido.")
             return False
 
         if not message or not isinstance(message, str):
-            print("[Z-API] Falha: Mensagem vazia ou inválida.")
+            logger.warning("[ZAPI_INTEGRATION] Falha: Mensagem vazia ou inválida.")
             return False
 
         # 2. Preparação
@@ -76,35 +78,18 @@ class ZAPIClient:
         max_attempts = 3
         for attempt in range(1, max_attempts + 1):
             try:
-                print(f"[Z-API] Enviando para {target_phone} (Tentativa {attempt})...")
+                logger.info(f"[ZAPI_INTEGRATION] Enviando para {target_phone} (Tentativa {attempt})...")
                 
                 response = requests.post(url, json=payload, headers=self.headers, timeout=10)
                 response.raise_for_status() # Levanta erro se status code for 4xx ou 5xx
 
-                print(f"[Z-API] Status: {response.status_code}")
-                print(f"[Z-API] Body: {response.text}")
+                logger.info(f"[ZAPI_INTEGRATION] Status: {response.status_code}")
+                logger.info(f"[ZAPI_INTEGRATION] Body: {response.text}")
 
                 return True
 
             except requests.exceptions.RequestException as e:
-                print(f"[Z-API] Falha definitiva ao enviar para {target_phone}.")
+                logger.warning(f"[ZAPI_INTEGRATION] Falha definitiva ao enviar para {target_phone}. Erro: {e}")
                 continue
         
         return False
-    
-def disparar_whatsapp(telefone, texto):
-    """
-    Função simples para você passar os parâmetros e executar.
-    """
-    client = ZAPIClient()
-    return client.send_message(phone=telefone, message=texto)
-
-# Exemplo de uso manual:
-if __name__ == "__main__":
-    # Substitua pelos dados reais ou garanta que o .env está carregado
-    sucesso = disparar_whatsapp("71981472898", "Olá, este é um teste de envio direto!")
-    
-    if sucesso:
-        print("Envio concluído!")
-    else:
-        print("Falha no envio.")

@@ -22,6 +22,7 @@ def create_app():
             "https://formulario-frontend.lm1d9l.easypanel.host",
             "https://formulario-app.lm1d9l.easypanel.host",
             "https://157.173.119.252",
+            "http://localhost:4173"
         ]
     }},
     supports_credentials=True,
