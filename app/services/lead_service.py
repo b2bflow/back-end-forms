@@ -1,3 +1,5 @@
+import re
+
 from app.interfaces.services.lead_service_interface import LeadServiceInterface
 from app.interfaces.repositories.lead_repository_interface import LeadRepositoryInterface
 from app.integrations.pipedrive_crm_integration import PipedriveClient
@@ -13,8 +15,26 @@ class LeadService(LeadServiceInterface):
         self.repository = repository
         self.pipedrive_client = PipedriveClient()
 
+
+    def format_brazilian_phone(self, phone: str) -> str:
+        digits = re.sub(r'\D', '', str(phone))
+        
+        if digits.startswith('0'):
+            digits = digits[1:]
+
+        if not digits.startswith('55'):
+            digits = f"55{digits}"
+        
+        if len(digits) == 12:
+            digits = f"{digits[:4]}9{digits[4:]}"
+            
+        return digits
+
     def create_lead(self, data: Dict) -> Dict:
         logger.info(f"[LEAD_SERVICE] Criando lead")
+
+        if "phone" in data:
+            data["phone"] = self.format_brazilian_phone(data["phone"])
 
         lead = self.repository.find_by_phone(data["phone"])
 
@@ -70,7 +90,14 @@ class LeadService(LeadServiceInterface):
 
     def update_lead(self, data: Dict) -> Dict:
         logger.info(f"[LEAD_SERVICE] Atualizando dados do lead")
+
+        if "phone" in data:
+            data["phone"] = self.format_brazilian_phone(data["phone"])
+
         lead = self.repository.find_by_phone(data["phone"])
+
+        if lead is None:
+            lead = self.repository.find_by_email(data["email"])
 
         if not lead:
             raise ValueError("Lead nao encontrado")
@@ -82,7 +109,7 @@ class LeadService(LeadServiceInterface):
 
         if updated_lead.type_lead == 'venda':
             return self.update_sales_lead(updated_lead)
-
+        
         if updated_lead.type_lead == 'consultoria':
             return self.update_followup_lead(updated_lead)
     
@@ -96,6 +123,7 @@ class LeadService(LeadServiceInterface):
             id_funcionarios = self.pipedrive_client._get_pipedrive_option_id("funcionarios", lead.sales_data.collaborators)
 
             self.pipedrive_client.update_organization_details(
+                url="organizations",
                 org_id=lead.id_organization_pipedrive,
                 segmento=lead.sales_data.business_tracking,
                 faturamento=id_faturamento,
@@ -103,7 +131,6 @@ class LeadService(LeadServiceInterface):
                 produto=lead.sales_data.product_of_interest,
             )
 
-            deal_title = lead.business_name
             deal_id = lead.id_deal_pipedrive
 
             if deal_id:
@@ -125,7 +152,6 @@ class LeadService(LeadServiceInterface):
             raise ValueError(f"Erro ao processar Pipedrive: {str(e)}")
         
     def update_followup_lead(self, lead: Lead) -> Dict:
-
         desafios_selecionados = lead.followup_data.challenge
         ids_desafios = []
         
@@ -133,25 +159,26 @@ class LeadService(LeadServiceInterface):
             for texto_desafio in desafios_selecionados:
                 id_op = self.pipedrive_client._get_pipedrive_option_id("desafio", texto_desafio)
                 if id_op:
-                    ids_desafios.append(str(id_op))
+                    ids_desafios.append(id_op)
             
-            valor_desafio_final = ",".join(ids_desafios)
+            valor_desafio_final = ids_desafios 
         else:
-            valor_desafio_final = self.pipedrive_client._get_pipedrive_option_id("desafio", desafios_selecionados)
+            id_op = self.pipedrive_client._get_pipedrive_option_id("desafio", desafios_selecionados)
+            valor_desafio_final = [id_op] if id_op else []
 
         id_momento = self.pipedrive_client._get_pipedrive_option_id("momento", lead.followup_data.customer_stage)
-        id_capacidade_investimento = self.pipedrive_client._get_pipedrive_option_id("investimento", lead.followup_data.investment_capacity)
+        # id_capacidade_investimento = self.pipedrive_client._get_pipedrive_option_id("investimento", lead.followup_data.investment_capacity)
 
         try:
             logger.info(f"[LEAD_SERVICE] Atualizando campos do lead")
             self.pipedrive_client.update_organization_details(
-                org_id=lead.id_organization_pipedrive,
+                url="deals",
+                org_id=lead.id_deal_pipedrive,
                 desafio=valor_desafio_final,
                 momento=id_momento,
-                capacidade_investimento=id_capacidade_investimento,
+                # capacidade_investimento=id_capacidade_investimento,
             )
 
-            deal_title = lead.business_name
             deal_id = lead.id_deal_pipedrive
 
             if deal_id:

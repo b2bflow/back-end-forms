@@ -91,9 +91,15 @@ class CronJobService(CronJobServiceInterface):
                 created_at = self._ensure_timezone(lead.created_at)
 
                 if now - created_at >= self.DELAY_RECOVERY:
-                    
-                    first_name = lead.name.split()[0] if lead.name else "visitante"
-                    msg = f"Eaee {first_name}! Tudo certo?\n\nAqui é o Marcelo Baldi da b2bflow.\n\nVi que entrou em contato para atender\ncomo implementar IA na operação, e acredito que posso ajudar\n\nQual horário posso te ligar e entender melhor seu momento?"
+
+                    if lead.type_lead == 'venda':
+                        first_name = lead.name.split()[0] if lead.name else "Meu querido"
+                        msg = f"Eaee {first_name}! Tudo certo?\n\nAqui é o Marcelo Baldi, da b2bflow.\n\nVi que entrou em contato para entender\ncomo implementar IA na operação e acredito que posso ajudar.\n\nQual horário posso te ligar para entender melhor seu momento?"
+
+                    else:
+                        first_name = lead.name.split()[0] if lead.name else "Meu querido"
+                        msg = f"Eaee {first_name}! Tudo certo?\n\nAqui é o Marcelo Baldi.\n\nVi que você se cadastrou para entender como criar um negócio de IA lucrativo.\n\nQual horário posso te ligar para entender se consigo ajudar?"
+
                     
                     if self.zapi.send_message(lead.phone, msg):
                         self.lead_repository.update_by_phone(lead.phone, {"recovery_sent": True})

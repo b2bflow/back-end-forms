@@ -151,6 +151,8 @@ class PipedriveClient:
         """Método auxiliar para requisições PUT (Atualização)"""
         url = f"{self.base_url}/{endpoint}/{resource_id}?api_token={self.api_token}"
         response = requests.put(url, json=data, headers=self._get_headers())
+
+        logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] Requisição PUT para {url} com dados: {data}, resposta: {response.status_code} - {response.text}")
         
         if response.status_code == 200:
             logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] Atualização realizada com sucesso no ID {resource_id}")
@@ -174,7 +176,7 @@ class PipedriveClient:
         logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] 🏢 Criando Organização no Pipedrive")
         return self._post("organizations", data)
     
-    def update_organization_details(self, org_id: int, segmento: str = None, faturamento: int = None, funcionarios: int = None, produto: str = None, desafio: list = None, momento: int = None, capacidade_investimento: int = None):
+    def update_organization_details(self, url: str,org_id: int, segmento: str = None, faturamento: int = None, funcionarios: int = None, produto: str = None, desafio: list = None, momento: int = None):
         data = {}
 
         if segmento: data[self.FIELD_SEGMENTO] = segmento
@@ -183,12 +185,12 @@ class PipedriveClient:
         if produto: data[self.FIELD_PRODUTO] = produto
         if desafio: data[self.FIELD_DESAFIO] = desafio
         if momento: data[self.FIELD_MOMENTO] = momento
-        if capacidade_investimento: data[self.FIELD_CAPACIDADE_INVESTIMENTO] = capacidade_investimento
+        # if capacidade_investimento: data[self.FIELD_CAPACIDADE_INVESTIMENTO] = capacidade_investimento
 
         if not data: return None
 
         logger.info(f"[PIPEDRIVE_CRM_INTEGRATION] Atualizando dados da Organização {org_id}...")
-        return self._put("organizations", org_id, data)
+        return self._put(url, org_id, data)
 
     def create_person(self, name: str, org_id: int, email: str = None, phone: str = None) -> dict:
         """
