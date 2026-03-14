@@ -98,7 +98,7 @@ def get_free_busy_slots() -> list:
         return None
 
 def get_available_slots():
-    """Gera lista de horários livres baseada na ocupação."""
+    """Gera lista de horários livres, descartando o dia se houver qualquer ocupação."""
     busy_slots = get_free_busy_slots()
     if busy_slots is None:
         return []
@@ -120,25 +120,24 @@ def get_available_slots():
     current_day = now.date() + timedelta(days=1)
 
     while current_day <= end_date.date():
-        # Ignora finais de semana (5=Sábado, 6=Domingo)
         if current_day.weekday() >= 5:
             current_day += timedelta(days=1)
             continue
 
+        is_day_busy = any(
+            s['data'] == current_day.isoformat()
+            for s in busy_slots
+        )
+
+        if is_day_busy:
+            current_day += timedelta(days=1)
+            continue
+        
         day_slots = []
         for hour in range(START_HOUR, END_HOUR):
-            slot_time = f"{hour:02d}:00"
-
-            # Verifica conflito
-            is_busy = any(
-                s['data'] == current_day.isoformat() and
-                s['hora_inicio'] <= slot_time < s['hora_fim']
-                for s in busy_slots
-            )
-
             day_slots.append({
-                "time": slot_time,
-                "available": not is_busy
+                "time": f"{hour:02d}:00",
+                "available": True
             })
 
         available_days.append({
