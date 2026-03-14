@@ -7,34 +7,37 @@ from app.utils.logging_config import logger
 
 
 class CronJobService(CronJobServiceInterface):
-    def __init__(self, repository: LeadRepositoryInterface):
-        self.lead_repository = repository
-        self.zapi = ZAPIClient()
-        
-        # Definição de Fuso Horário (Brasil)
-        self.TZ_BRASIL = dateutil.tz.gettz('America/Sao_Paulo')
-        
-        # Configurações de tempo ORIGINAIS (1 hora)
-        self.DELAY_CONFIRMATION = timedelta(hours=1)
-        self.DELAY_RECOVERY = timedelta(hours=1)
-
-    def _get_now(self):
-        """Retorna a hora atual com Fuso Horário correto."""
-        return datetime.now(self.TZ_BRASIL)
-
-    def _ensure_timezone(self, dt: datetime):
-        """
-        Garante que a data seja interpretada como Horário de Brasília.
-        Corrige o problema onde o banco salva horário local com flag UTC.
-        """
-        if dt is None: return None
-        
-        # 1. Remove qualquer info de fuso (UTC/Z) para pegar a hora 'limpa'
-        if dt.tzinfo is not None:
-            dt = dt.replace(tzinfo=None)
+    class CronJobService(CronJobServiceInterface):
+        def __init__(self, repository: LeadRepositoryInterface):
+            self.lead_repository = repository
+            self.zapi = ZAPIClient()
             
-        # 2. Força o fuso Brasil (Ex: se era 10:30Z, vira 10:30 Brasil)
-        return dt.replace(tzinfo=self.TZ_BRASIL)
+            # Definição de Fuso Horário (Brasil)
+            self.TZ_BRASIL = dateutil.tz.gettz('America/Sao_Paulo')
+            self.TZ_UTC = dateutil.tz.tzutc()
+            
+            # Configurações de tempo
+            self.DELAY_CONFIRMATION = timedelta(hours=1)
+            self.DELAY_RECOVERY = timedelta(hours=1)
+
+        def _get_now(self):
+            """Retorna a hora atual com Fuso Horário de Brasília."""
+            return datetime.now(self.TZ_BRASIL)
+
+        def _ensure_timezone(self, dt: datetime):
+            """
+            CORREÇÃO: Converte o horário do banco (UTC) para o horário de Brasília.
+            Se o banco enviar 13:00+00:00, esta função retornará 10:00-03:00.
+            """
+            if dt is None: 
+                return None
+            
+            # Se o datetime vier sem fuso (naive) do banco, tratamos como UTC
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=self.TZ_UTC)
+                
+            # .astimezone() CONVERTE as horas (ex: 13h -> 10h) em vez de apenas renomear
+            return dt.astimezone(self.TZ_BRASIL)
 
     def send_confirmation_messager(self):
         """
